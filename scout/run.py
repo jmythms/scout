@@ -2990,16 +2990,26 @@ class Engine(object):
                                         "total"][var_sub][yr]) * (
                                         1 - adj_frac_t) * fs_eff_splt_var
                             else:
-                                # Handle efficient-captured energy case for
-                                # fuel switching, where no base fuel data will
-                                # be reported (go to next variable in loop)
+                                # Handle case where no base fuel data is reported, which is
+                                # conceivable for fuel switching (go to next variable in loop)
                                 try:
-                                    adj_out_break[
-                                        "base fuel"][var][var_sub][yr] = \
-                                        adj_out_break["base fuel"][var][
-                                            var_sub][yr] - (
-                                        adj[var]["total"][var_sub][yr]) * (
-                                        1 - adj_frac_t) * fs_eff_splt_var
+                                    # Ensure baseline result is not already zero before
+                                    # adjusting; if zero, no further adjustment required
+                                    if (not isinstance(
+                                        adj_out_break["base fuel"][var][var_sub][yr], numpy.ndarray)
+                                        and adj_out_break["base fuel"][var][var_sub][yr] != 0) or (
+                                        isinstance(
+                                            adj_out_break["base fuel"][var][var_sub][yr],
+                                            numpy.ndarray) and all(adj_out_break[
+                                                "base fuel"][var][var_sub][yr]) != 0):
+                                        adj_out_break[
+                                            "base fuel"][var][var_sub][yr] = \
+                                            adj_out_break["base fuel"][var][
+                                                var_sub][yr] - (
+                                            adj[var]["total"][var_sub][yr]) * (
+                                            1 - adj_frac_t) * fs_eff_splt_var
+                                    else:
+                                        continue
                                 except KeyError:
                                     continue
 
@@ -4224,15 +4234,23 @@ class Engine(object):
                             adj_key = "measure"
                     else:
                         adj_key = var_sub
-                    # Handle efficient-captured energy case for fuel switching,
-                    # where no base fuel data will be reported (skip to next
-                    # variable)
+                    # Handle case where no base fuel data is reported, which is conceivable
+                    # for fuel switching (go to next variable in loop)
                     try:
-                        adj_out_break["base fuel"][var][var_sub][yr] = \
-                            adj_out_break["base fuel"][var][
-                                var_sub][yr] - (
-                            adj[var]["total"][adj_key][yr]) * (
-                                1 - adj_t) * fs_eff_splt_var
+                        # Ensure baseline result is not already zero before adjusting; if zero, no
+                        # further adjustment required
+                        if (not isinstance(
+                                adj_out_break["base fuel"][var][var_sub][yr], numpy.ndarray)
+                            and adj_out_break["base fuel"][var][var_sub][yr] != 0) or (
+                            isinstance(adj_out_break["base fuel"][var][var_sub][yr], numpy.ndarray)
+                                and all(adj_out_break["base fuel"][var][var_sub][yr]) != 0):
+                            adj_out_break["base fuel"][var][var_sub][yr] = \
+                                adj_out_break["base fuel"][var][
+                                    var_sub][yr] - (
+                                adj[var]["total"][adj_key][yr]) * (
+                                    1 - adj_t) * fs_eff_splt_var
+                        else:
+                            continue
                     except KeyError:
                         continue
 
