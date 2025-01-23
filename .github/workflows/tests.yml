@@ -94,5 +94,5 @@ jobs:
   # ---------------------------------
   integration-tests:
     needs: [code-quality-checks, python-tests, check-docs]
-    uses: ./.github/workflows/integration_tests_gh.yml
+    uses: ./.github/workflows/integration_test_gh.yml
     secrets: inherit
