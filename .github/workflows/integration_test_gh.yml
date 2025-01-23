@@ -30,9 +30,9 @@ jobs:
           else
             python tests/integration_testing/run_workflow.py --yaml tests/integration_testing/integration_test.yml
           fi
-          mv ./results/*.json ./tests/integration_testing/results/
+          mv ./results/*.json ./tests/integration_testing/results/     
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: results
           path: ./tests/integration_testing/results/
