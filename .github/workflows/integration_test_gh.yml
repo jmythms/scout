@@ -20,8 +20,21 @@ jobs:
           pip install . psrecord
       - name: Run and profile workflow
         run: |
-          while sleep 10; do 
-            echo "Still running at $(date)"
+          # (Optional) Make sure we have the right tools; often these are installed by default
+          sudo apt-get update
+          sudo apt-get install -y procps      
+          # Start a background keep-alive loop with system stats
+          while sleep 60; do
+            date_time=$(date)
+            # Grab CPU usage (user + sys) via top
+            # Example line from top: "Cpu(s):  7.3%us,  0.4%sy,  0.0%ni, 92.1%id, ..."
+            cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')            
+            # Grab memory usage % from 'free'
+            # Example from 'free -m': second line => total used free ...
+            mem_usage=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')      
+            # Grab root volume disk usage (e.g. "/")
+            disk_usage=$(df -h / | awk 'NR==2 {print $5}')      
+            echo "[Keep-alive] $date_time | CPU: ${cpu_usage}% | MEM: ${mem_usage}% | DISK: ${disk_usage} used"
           done &
           branch_name="${{ github.ref_name }}"
           if [[ $branch_name == 'master'  || $branch_name == 'ci_outputs' ]]; then
