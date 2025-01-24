@@ -21,7 +21,7 @@ jobs:
       - name: Run and profile workflow
         run: |
           branch_name="${{ github.ref_name }}"
-          if [[ $branch_name == 'master' ]]; then
+          if [[ $branch_name == 'master'  || $branch_name == 'ci_outputs' ]]; then
             steps=("ecm_prep" "run")
             for step in "${steps[@]}"; do
               psrecord --log memory_log_${step}.txt --include-children --interval 1 "python tests/integration_testing/run_workflow.py --run_step $step --yaml tests/integration_testing/integration_test.yml --with_profiler"
