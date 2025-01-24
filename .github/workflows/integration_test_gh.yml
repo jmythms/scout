@@ -20,6 +20,9 @@ jobs:
           pip install . psrecord
       - name: Run and profile workflow
         run: |
+          while sleep 10; do 
+            echo "Still running at $(date)"
+          done &
           branch_name="${{ github.ref_name }}"
           if [[ $branch_name == 'master'  || $branch_name == 'ci_outputs' ]]; then
             steps=("ecm_prep" "run")
