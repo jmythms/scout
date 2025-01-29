@@ -10,14 +10,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
+
+      - name: List directory contents
+        run: |
+          echo "Listing /home/runner/work/scout/ contents:"
+          ls -R /home/runner/work/scout/
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install . psrecord
+
       - name: Run and profile workflow
         run: |
           # (Optional) Make sure we have the right tools; often these are installed by default
@@ -27,13 +35,11 @@ jobs:
           while sleep 60; do
             date_time=$(date)
             # Grab CPU usage (user + sys) via top
-            # Example line from top: "Cpu(s):  7.3%us,  0.4%sy,  0.0%ni, 92.1%id, ..."
-            cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')            
+            cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
             # Grab memory usage % from 'free'
-            # Example from 'free -m': second line => total used free ...
-            mem_usage=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')      
+            mem_usage=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
             # Grab root volume disk usage (e.g. "/")
-            disk_usage=$(df -h / | awk 'NR==2 {print $5}')      
+            disk_usage=$(df -h / | awk 'NR==2 {print $5}')
             echo "[Keep-alive] $date_time | CPU: ${cpu_usage}% | MEM: ${mem_usage}% | DISK: ${disk_usage} used"
           done &
           branch_name="${{ github.ref_name }}"
@@ -48,12 +54,14 @@ jobs:
           else
             python tests/integration_testing/run_workflow.py --yaml tests/integration_testing/integration_test_new.yml
           fi
-          mv ./results/*.json ./tests/integration_testing/results/     
+          mv ./results/*.json ./tests/integration_testing/results/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: results
           path: ./tests/integration_testing/results/
+
       - name: Commit test results
         run: |
           branch_name="${{ github.ref_name }}"
