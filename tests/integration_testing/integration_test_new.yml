@@ -1,47 +1,8 @@
-description: Configuration file for testing, matches arguments of test_files/config1.yml with the exception of `ecm_files`
+description: Defines arguments for integration testing runs
 ecm_prep:
-  ecm_directory: ../../../test_files/ecm_definitions
-  ecm_files: [Best Com. Air Sealing (New), Best Com. Air Sealing (Exist)]
-  ecm_files_regex: []
-  ecm_packages: []
-  site_energy: false
-  captured_energy: false
+  ecm_packages: ["ENERGY STAR Res. ASHP (FS) + Env."]
+  add_typ_eff: true
+  rp_persist: true
   alt_regions: EMM
-  sect_shapes: false
-  rp_persist: false
-  verbose: false
-  health_costs: false
-  split_fuel: false
-  no_scnd_lgt: false
-  floor_start: null
-  pkg_env_costs: null
-  alt_ref_carb: null
-  adopt_scn_restrict: null
-  add_typ_eff: false
-  pkg_env_sep: false
-  detail_brkout: []
-  fugitive_emissions: []
-  tsv_metrics:
-    tsv_type: null
-    tsv_daily_hr_restrict: null
-    tsv_sys_shape_case: null
-    tsv_season: null
-    tsv_energy_agg: null
-    tsv_power_agg: null
-    tsv_average_days: null
-  exog_hp_rates:
-    exog_hp_rate_scenario: null
-    switch_all_retrofit_hp: false
-  grid_decarb:
-    grid_decarb_level: null
-    grid_assessment_timing: null
-  retrofits:
-    retrofit_type: null
-    retrofit_multiplier: null
-    retrofit_mult_year: null
-run:
-  verbose: false
-  mkt_fracs: false
-  trim_results: false
-  report_stk: false
-  report_cfs: false
+run: 
+  None: None
