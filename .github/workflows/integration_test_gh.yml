@@ -68,8 +68,8 @@ jobs:
           git pull origin $branch_name
           git add ./tests/integration_testing/results/*.json
           if [[ $(git diff --cached --exit-code) ]]; then
-            git config --system user.email "github-action@users.noreply.github.com"
-            git config --system user.name "GitHub Action"
+            git config --global user.email "github-action@users.noreply.github.com"
+            git config --global user.name "GitHub Action"
             git commit -m "Upload results files from CI build"
             echo "Pushing to branch: $branch_name"
             git push -u origin $branch_name
