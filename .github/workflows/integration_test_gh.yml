@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
 
       - name: Print the triggering event
         run: |
@@ -38,32 +38,42 @@ jobs:
 
       - name: Run and profile workflow
         run: |
-          # (Optional) Make sure we have the right tools; often these are installed by default
+          # Determine branch reference based on event type
+          if [ "${{ inputs.event_type }}" = "pull_request" ]; then
+            branch_ref="${{ github.head_ref }}"
+          else
+            branch_ref="${{ github.ref }}"
+          fi
+          echo "Branch ref: $branch_ref"
+
+          # (Optional) Ensure required tools are available
           sudo apt-get update
-          sudo apt-get install -y procps      
+          sudo apt-get install -y procps
+
           # Start a background keep-alive loop with system stats
           while sleep 60; do
             date_time=$(date)
-            # Grab CPU usage (user + sys) via top
             cpu_usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2 + $4}')
-            # Grab memory usage % from 'free'
             mem_usage=$(free -m | awk 'NR==2{printf "%.2f", $3*100/$2 }')
-            # Grab root volume disk usage (e.g. "/")
             disk_usage=$(df -h / | awk 'NR==2 {print $5}')
             echo "[Keep-alive] $date_time | CPU: ${cpu_usage}% | MEM: ${mem_usage}% | DISK: ${disk_usage} used"
           done &
-          branch_ref="${{ github.ref }}"
-          if [[ $branch_ref == 'refs/heads/master'  || $branch_ref == 'refs/heads/ci_outputs' ]]; then
+
+          if [[ $branch_ref == 'refs/heads/master' || $branch_ref == 'refs/heads/ci_outputs' ]]; then
             steps=("ecm_prep" "run")
             for step in "${steps[@]}"; do
               echo "Running profiler for step: $step"
-              psrecord --log memory_log_${step}.txt --include-children --interval 1 "python tests/integration_testing/run_workflow.py --run_step $step --yaml tests/integration_testing/integration_test_new.yml --with_profiler"
-              (echo -e; echo "# Elapsed time,CPU (%),Peak Real (MB),Peak Virtual (MB)"; grep -v "time" memory_log_${step}.txt | sort -k3 -n -r | head -n 1 | column -t | tr -s '[:blank:]' ',') >> tests/integration_testing/results/profile_${step}.csv
+              psrecord --log memory_log_${step}.txt --include-children --interval 1 \
+                "python tests/integration_testing/run_workflow.py --run_step $step --yaml tests/integration_testing/integration_test_new.yml --with_profiler"
+              (echo -e; echo "# Elapsed time,CPU (%),Peak Real (MB),Peak Virtual (MB)"; \
+              grep -v "time" memory_log_${step}.txt | sort -k3 -n -r | head -n 1 | column -t | tr -s '[:blank:]' ',') \
+              >> tests/integration_testing/results/profile_${step}.csv
               mv memory_log_${step}.txt ./tests/integration_testing/results/
             done
           else
             python tests/integration_testing/run_workflow.py --yaml tests/integration_testing/integration_test_new.yml
           fi
+
           mv ./results/*.json ./tests/integration_testing/results/
 
       - name: Upload artifacts
@@ -74,7 +84,14 @@ jobs:
 
       - name: Commit test results
         run: |
-          branch_ref="${{ github.ref }}"
+          # Determine branch reference based on event type
+          if [ "${{ inputs.event_type }}" = "pull_request" ]; then
+            branch_ref="${{ github.head_ref }}"
+          else
+            branch_ref="${{ github.ref }}"
+          fi
+          echo "Using branch ref: $branch_ref"
+
           git pull origin $branch_ref
           git add ./tests/integration_testing/results/*.json
           git config --global user.email "github-action@users.noreply.github.com"
