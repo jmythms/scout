@@ -11,6 +11,10 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
+      - name: Get the original branch name
+        run: |
+          echo "Original branch: $GITHUB_HEAD_REF"
+
       - name: List directory contents
         run: |
           echo "Listing /home/runner/work/scout/ contents:"
