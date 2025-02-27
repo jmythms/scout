@@ -1,5 +1,11 @@
 name: integration-tests
-on: [workflow_call]
+on: 
+  workflow_call:
+    inputs:
+      event_type:
+        description: "The event type that triggered the parent workflow"
+        required: true
+        type: string
 
 jobs:
   run-test:
@@ -11,9 +17,9 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Get the original branch name
+      - name: Print the triggering event
         run: |
-          echo "Original branch: $GITHUB_HEAD_REF"
+          echo "Triggered by: ${{ inputs.event_type }}"
 
       - name: List directory contents
         run: |
