@@ -62,7 +62,7 @@ jobs:
           name: results
           path: ./tests/integration_testing/results/
 
-            - name: Commit test results
+      - name: Commit test results
         run: |
           branch_ref="${{ github.ref }}"
           git pull origin $branch_ref
@@ -89,4 +89,3 @@ jobs:
                 "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
               }'
           done
-
