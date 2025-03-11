@@ -1,12 +1,5 @@
 name: integration-tests
-on: 
-  workflow_call:
-    inputs:
-      event_type:
-        description: "The event type that triggered the parent workflow"
-        required: true
-        type: string
-
+on: [workflow_call]
 jobs:
   run-test:
     name: Integration Testing
@@ -16,10 +9,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-
-      - name: Print the input event type
-        run: |
-          echo "Triggered by: ${{ inputs.event_type }}"
 
       - name: Print the triggering event name
         run: |
@@ -43,7 +32,7 @@ jobs:
       - name: Run and profile workflow
         run: |
           # Determine branch reference based on event type
-          if [ "${{ inputs.event_type }}" = "pull_request" ]; then
+          if [ "${{ github.event_name  }}" = "pull_request" ]; then
             branch_ref="${{ github.head_ref }}"
           else
             branch_ref="${{ github.ref }}"
@@ -89,7 +78,7 @@ jobs:
       - name: Commit test results
         run: |
           # Determine branch reference based on event type
-          if [ "${{ inputs.event_type }}" = "pull_request" ]; then
+          if [ "${{ github.event_name  }}" = "pull_request" ]; then
             branch_ref="${{ github.head_ref }}"
           else
             branch_ref="${{ github.ref }}"
