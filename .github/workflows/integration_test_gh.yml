@@ -17,9 +17,13 @@ jobs:
         with:
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
 
-      - name: Print the triggering event
+      - name: Print the input event type
         run: |
           echo "Triggered by: ${{ inputs.event_type }}"
+
+      - name: Print the triggering event name
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"          
 
       - name: List directory contents
         run: |
