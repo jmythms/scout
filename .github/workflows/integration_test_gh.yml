@@ -10,10 +10,10 @@ jobs:
       - name: Determine branch ref
         id: branch_ref
         run: |
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            echo "branch_ref=refs/heads/$GITHUB_HEAD_REF" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "branch_ref=refs/heads/${{ github.head_ref }}" >> $GITHUB_OUTPUT
           else
-            echo "branch_ref=$GITHUB_REF" >> $GITHUB_OUTPUT
+            echo "branch_ref=${{ github.ref }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Checkout code
