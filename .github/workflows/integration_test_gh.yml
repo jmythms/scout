@@ -1,18 +1,29 @@
 name: integration-tests
 on: [workflow_call]
+
 jobs:
   run-test:
     name: Integration Testing
     runs-on: ubuntu-latest
     timeout-minutes: 720
     steps:
-      - uses: actions/checkout@v4
+      - name: Determine branch ref
+        id: branch_ref
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            echo "branch_ref=refs/heads/$GITHUB_HEAD_REF" >> $GITHUB_OUTPUT
+          else
+            echo "branch_ref=$GITHUB_REF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-         ref: "${{ github.event_name == 'pull_request' ? format('refs/heads/{0}', github.head_ref) : github.ref }}"
+          ref: "${{ steps.branch_ref.outputs.branch_ref }}"
 
       - name: Print the triggering event name
         run: |
-          echo "Triggered by: ${{ github.event_name }}"          
+          echo "Triggered by: $GITHUB_EVENT_NAME"
 
       - name: List directory contents
         run: |
@@ -30,13 +41,9 @@ jobs:
           pip install . psrecord
 
       - name: Run and profile workflow
+        env:
+          branch_ref: ${{ steps.branch_ref.outputs.branch_ref }}
         run: |
-          # Determine branch reference based on event type
-          if [ "${{ github.event_name  }}" = "pull_request" ]; then
-            branch_ref="refs/heads/${{ github.head_ref }}"
-          else
-            branch_ref="${{ github.ref }}"
-          fi
           echo "Branch ref: $branch_ref"
 
           # (Optional) Ensure required tools are available
@@ -76,13 +83,9 @@ jobs:
           path: ./tests/integration_testing/results/
 
       - name: Commit test results
+        env:
+          branch_ref: ${{ steps.branch_ref.outputs.branch_ref }}
         run: |
-          # Determine branch reference based on event type
-          if [ "${{ github.event_name  }}" = "pull_request" ]; then
-            branch_ref="refs/heads/${{ github.head_ref }}"
-          else
-            branch_ref="${{ github.ref }}"
-          fi
           echo "Using branch ref: $branch_ref"
 
           git pull origin $branch_ref
