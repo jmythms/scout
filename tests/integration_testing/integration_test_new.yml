@@ -1,0 +1,8 @@
+description: Defines arguments for integration testing runs
+ecm_prep:
+  ecm_files: [Best Com. Air Sealing (New), Best Com. Air Sealing (Exist)]
+  add_typ_eff: true
+  rp_persist: true
+  alt_regions: EMM
+run: 
+  None: None

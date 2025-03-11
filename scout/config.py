@@ -35,6 +35,7 @@ class FilePaths:
 
     # Non-package data:
     _parent_dir = Path.cwd()  # parent dir of repo
+    print(f"parent dir: {_parent_dir}")
     ECM_DEF = _parent_dir / "ecm_definitions"
     GENERATED = _parent_dir / "generated"
     ECM_COMP = GENERATED / "ecm_competition_data"
