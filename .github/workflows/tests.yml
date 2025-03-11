@@ -96,5 +96,3 @@ jobs:
     needs: [code-quality-checks, python-tests, check-docs]
     uses: ./.github/workflows/integration_test_gh.yml
     secrets: inherit
-    with:
-      event_type: ${{ github.event_name }}
