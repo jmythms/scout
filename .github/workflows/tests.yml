@@ -100,3 +100,24 @@ jobs:
       github.ref == 'refs/heads/master'
     uses: ./.github/workflows/integration_tests.yml
     secrets: inherit
+
+  integration-tests-status:
+    needs: [check-PR, integration-tests]
+    if: always() && needs.integration-tests.result == 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      statuses: write
+    steps:
+      - name: Post skipped status
+        run: |
+          commit_sha="${{ github.event.pull_request.head.sha || github.sha }}"
+          curl -L -X POST \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/$commit_sha" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{
+              "state": "failure",
+              "context": "integration-tests / Integration Testing",
+              "description": "Skipped \u2014 upstream job failed",
+              "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }'
