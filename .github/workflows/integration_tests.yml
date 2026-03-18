@@ -248,6 +248,11 @@ jobs:
             exit 1
           fi
 
+  # Build a Markdown summary of the integration test run (Ubuntu baseline +
+  # cross-platform results, diff details, and before/after plot images) and
+  # upload it as an artifact.  A separate workflow (e.g. workflow_run) picks up
+  # the artifact and posts it as a comment on the pull request so reviewers can
+  # quickly see the current state of the integration tests.
   save-pr-comment:
     name: Save PR Comment Artifact
     needs: [run-test, cross-platform-test]
@@ -269,6 +274,9 @@ jobs:
         with:
           pattern: results-*
           path: ./cross-platform-results
+      # Assemble the PR comment body: a status table for Ubuntu, a cross-
+      # platform results table (Windows/macOS), failure details if applicable,
+      # and embedded before/after plot images when plots differ from master.
       - name: Build comment body
         uses: actions/github-script@v7
         env:
@@ -397,6 +405,8 @@ jobs:
             }
 
             fs.writeFileSync('comment_body.md', body);
+      # Upload the PR number and comment body so a downstream workflow_run
+      # workflow can post (or update) the comment on the pull request.
       - name: Upload comment artifact
         uses: actions/upload-artifact@v4
         with:
