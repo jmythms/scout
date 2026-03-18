@@ -107,7 +107,7 @@ sequenceDiagram
 - **Cross-platform**: Windows and macOS run JSON-level comparison against master
 
 ### When Results Differ
-1. Full results (JSON, PDFs, Excel) are uploaded as workflow artifacts (Ubuntu only)
+1. Full results (JSON, PDFs, Excel) are uploaded as workflow artifacts — Ubuntu uploads all results; Windows and macOS upload JSON results and comparison status
 2. If plot images differ (pixel-level), comparison PNGs are committed to the PR branch for embedding in the PR comment
 3. JSON and PDF result files are **not** committed to avoid breaking GitHub's diff viewer
 4. The failure message specifies what changed: JSON diffs, pixel-level plot diffs, or both
@@ -126,7 +126,7 @@ sequenceDiagram
 ### Accepting Expected Changes
 1. Add the `update-baseline` label to the PR
 2. CI re-runs automatically (via `labeled` trigger)
-3. The failure step is skipped — results are accepted as the new baseline
+3. The failure step runs but exits successfully with a warning — results are accepted as the new baseline
 4. When merged, the committed results become the master baseline
 
 ### Pinned Environment
@@ -166,7 +166,7 @@ When enabled (via `run-profiler` label or push to `master`), the profiler:
 Use this when code changes intentionally alter results:
 1. Review the before/after plots in the PR comment
 2. If the changes are expected, add the `update-baseline` label
-3. CI re-runs and skips the failure step (emits a warning instead) — applies to both **unit tests** and **integration tests**
+3. CI re-runs and the failure step exits successfully with a warning instead of failing — applies to both **unit tests** and **integration tests**
 4. On merge, the committed results become the new master baseline
 
 ### Constraints File
