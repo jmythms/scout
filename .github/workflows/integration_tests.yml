@@ -250,18 +250,16 @@ jobs:
 
   # Build a Markdown summary of the integration test run (Ubuntu baseline +
   # cross-platform results, diff details, and before/after plot images) and
-  # upload it as an artifact.  A separate workflow (e.g. workflow_run) picks up
-  # the artifact and posts it as a comment on the pull request so reviewers can
-  # quickly see the current state of the integration tests.
-  save-pr-comment:
-    name: Save PR Comment Artifact
+  # post it as a comment on the pull request so reviewers can quickly see
+  # the current state of the integration tests.
+  post-pr-comment:
+    name: Post PR Comment
     needs: [run-test, cross-platform-test]
     runs-on: ubuntu-latest
-    permissions: {}
+    permissions:
+      pull-requests: write
     if: ${{ always() && github.event_name == 'pull_request' }}
     steps:
-      - name: Save PR number
-        run: echo "${{ github.event.pull_request.number }}" > pr_number.txt
       - name: Download Ubuntu artifacts
         if: needs.run-test.outputs.has_plot_diff == 'true'
         uses: actions/download-artifact@v4
@@ -277,7 +275,8 @@ jobs:
       # Assemble the PR comment body: a status table for Ubuntu, a cross-
       # platform results table (Windows/macOS), failure details if applicable,
       # and embedded before/after plot images when plots differ from master.
-      - name: Build comment body
+      # Post it directly as a PR comment.
+      - name: Post comment to PR
         uses: actions/github-script@v7
         env:
           HAS_PLOT_DIFF: ${{ needs.run-test.outputs.has_plot_diff }}
@@ -404,16 +403,12 @@ jobs:
               }
             }
 
-            fs.writeFileSync('comment_body.md', body);
-      # Upload the PR number and comment body so a downstream workflow_run
-      # workflow can post (or update) the comment on the pull request.
-      - name: Upload comment artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pr-comment
-          path: |
-            pr_number.txt
-            comment_body.md
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body,
+            });
 
   cross-platform-test:
     name: Integration Testing (${{ matrix.os }})
